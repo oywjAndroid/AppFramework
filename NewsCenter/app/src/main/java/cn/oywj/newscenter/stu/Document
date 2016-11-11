@@ -1,0 +1,377 @@
+stu -- 在这个文件夹下面放置的文件都是学习代码（demo）
+
+1. 学习Dagger2的使用以及原理：
+
+    1.1 Dagger2 -- 是Android用来进行依赖注入的工具
+
+    1.2 依赖注入 -- class A 中有一个 class B ，那么class B 就称为 A的依赖，在A的构造方法当中new B(),其实就是在给A中
+    注入一个真正的B对象。
+        ````````````````````````````````
+         class A {
+            B b;
+            A(){
+               b = new B();
+            }
+            public void setName(String name){
+               b.setName();
+            }
+         }
+
+         class B{
+            String sName;
+
+            B(){
+                this.sName = sName;
+            }
+            public void setName(String name){
+                sName = name;
+            }
+            public String getName(){
+                return sName;
+            }
+         }
+
+         ````````````````````````````````
+
+     1.3 依赖注入的普通做法就像上面Demo,但是通过Dagger2是怎样实现的呢？
+         ````````````````````````````````
+              public class Property {
+                  private String mPropertiesName;
+
+                  @Inject
+                  public Property() {
+                      mPropertiesName = "我叫库日天";
+                  }
+
+                  public String getPropertiesName() {
+                      return mPropertiesName;
+                  }
+              }
+
+              public class MainActivity extends AppCompatActivity {
+
+                  private TextView text;
+
+                  @Inject
+                  Property mProperty;
+
+                  @Override
+                  protected void onCreate(Bundle savedInstanceState) {
+                      super.onCreate(savedInstanceState);
+                      setContentView(R.layout.activity_main);
+                      DaggerMainComponent.builder()
+                              .build()
+                              .inject(this);
+                      text = (TextView) findViewById(R.id.text_);
+                      text.setText(mProperty.getPropertiesName());
+                  }
+              }
+         ````````````````````````````````
+         上面的代码如果直接这样运行是会报错的，虽然MainActivity、Property都有被@Inject进行修饰，
+         但是MainActivity在运行的时候是无法找到Property对象进行注入的，这个时候要想将Property对象
+         注入到MainActivity当中的话就需要找个连接器(@Component)--MainComponent。
+
+         之后编译，会发现自动生成了在MainActivity同级目录下会生成 -- MainActivity_MembersInjector，
+         还会生成DaggerMainComponent以及Property_Factory.
+
+         MainActivity_MembersInjector负责持有MainActivity对象，Property_Factory负责创建Property对象，
+         最后DaggerMainComponent作为连接器执行注入动作。
+
+     1.4 使用@Module注解来生成实例对象,进行注入
+
+         有时候我们并不能直接在构造函数外面添加@Inject注解，或者类中存在多个构造函数时，@Inject也只能注解其中一个构造函数，
+         不能注解多个构造函数，这里是会产生歧义性，因为Dagger2无法确认调用哪一个构造函数来生成例的实例对象。
+         另外一种情况是我们在项目中引用第三方类库时，也是无法直接在类构造函数中添加@Inject注解的，所以我们需要用到@Module注解了。
+
+         demo演示：通过Dagger2注入第三方库对象，(例如：Gson对象)
+
+         /*
+          * @Module注解表示这个类提供生成一些实例用于注入
+          */
+         @Module
+         public class MainModule {
+             /**
+              * @return 返回注入对象
+              * @Provides: 注解表示这个方法是用来创建某个实例对象的，这里我们创建返回Gson对象
+              * 方法名随便，一般用provideXXX结构
+              */
+             @Provides
+             public Gson provideGson() {
+                 return new Gson();
+             }
+         }
+
+         创建一个用@Module修饰的类，里面需要提供什么实例对象，就创建一个用@Provides修饰的provideXXX()的方法，
+         在将Module关联至Component--(@Component(modules = MainModule.class)),在需要依赖注入的类中创建@Inject修饰的变量，即可完成注入。
+
+      1.5 Component可以依赖多个Module---(@Component(modules = {MainModule.class,PropertyModule.class,,,}))
+
+          优先级的问题，在上面这种既在构造函数中用***@Inject提供注入来源***，也在***@Module中用@Privodes注解提供注入来源的***，Dagger2是先从@Privodes查找类实例，
+          如果找到了就用@Module提供的方法来创建类实例，如果没有就从构造函数里用@Inject注解的生成类实例，如果二者都没有，则报错，简而言之，
+          就是@Module的优先级高于@Inject。
+
+      1.6 @Scope注解的作用：
+
+          - 多创建一个OtherActivity，这个Activity同样需要注入Property、Gson对象。
+
+          - 将MainComponent改为abstract并且设置为单例模式，这样Activities都可以使用同一个连接器。
+
+          - 进行注入的时候会发现两个Activity中相同内容的Property会被创建两次，但实际上我们只需要创建一个即可，那么这个时候就可以使用
+          @Scope注解了。(Scope代表着作用域)
+
+      1.7 @Scope注解使用方法：
+
+          -1 自定义一个Scope注解：
+
+            @Scope
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface PoetryScope {
+            }
+
+          -2 同时在Component(加在@Component注解上面) 与 Module(加载@Provides注解上面)中加上这个自定义Scope注解：
+
+              @PoetryScope
+              @Component(modules = {MainModule.class,PoetryModule.class})
+              public abstract class MainComponent {
+                  /**
+                   * 需要用到这个连接器的对象，就是这个对象里面有需要注入的属性
+                   * （被标记为@Inject的属性）
+                   * 这里inject表示注入的意思，这个方法名可以随意更改，但建议就
+                   * 用inject即可。
+                   */
+                  abstract void inject(MainActivity activity);
+
+                  abstract void inject(OtherActivity activity);
+
+                  private static MainComponent sComponent;
+                  public static MainComponent getInstance(){
+                      if (sComponent == null){
+                          sComponent = DaggerMainComponent.builder().build();
+                      }
+                      return sComponent;
+                  }
+              }
+
+              @Module
+              public class PoetryModule {
+
+                  // 这个方法需要一个String参数，在Dagger2注入中，这些参数也是注入形式的，也就是
+                  // 要有其他对方提供参数poems的生成，不然会造成编译出错
+                  @PoetryScope
+                  @Provides
+                  public Poetry providePoetry(String poems){
+                      return new Poetry(poems);
+                  }
+
+                  // 这里提供了一个生成String的方法，在这个Module里生成Poetry实例时，会查找到这里
+                  // 可以为上面提供String类型的参数
+                  @Provides
+                  public String providePoems(){
+                      return "只有意志坚强的人，才能到达彼岸";
+                  }
+              }
+
+          -3 关于Scope的总结：
+
+            通过实现自定义@Scope注解，标记当前生成对象的使用范围，标识一个类型的注射器只实例化一次，在同一个作用域内，只会生成一个实例，
+            然后在此作用域内共用一个实例。这样看起来很像单例模式，我们可以查看@Singleton其实就是@Scope的一个默认实现而已。
+            当然，你得是同一个Component对象来生成，这点我们应该可以理解的吧。
+            我们可以通过自定义Scope来组织Component的作用域，使得每个Component的作用域清晰明了，各施其职。
+
+      1.8 Component的依赖：
+
+          -1 Component之间的关系：
+
+            Component之间的关系：依赖关系，从属关系(包含关系)。
+
+            我们在一个项目之中不可能只使用一个Component连接器来注入对象完成注入工作，一般除了一个全局的ApplicationComponent之外，
+            还有一些作用域在Activity/Fragment的Component，Component之间存在依赖关系与从属关系。
+            如果我们已经创建好了一个全局的ApplicationComponent，然后其它的Component刚好需要ApplicationComponent里面的一个全局属性，
+            想要与ApplicationComponent共享同一个实例，这时就需要用到依赖关系了。
+
+          -2 Component Demo如下：
+
+              @PoetryScope
+              @Component(dependencies = ApplicationComponent.class, modules = {MainModule.class,PoetryModule.class})
+              public abstract class MainComponent {
+
+                  /**
+                   * 需要用到这个连接器的对象，就是这个对象里面有需要注入的属性
+                   * （被标记为@Inject的属性）
+                   * 这里inject表示注入的意思，这个方法名可以随意更改，但建议就
+                   * 用inject即可。
+                   */
+                  abstract void inject(MainActivity activity);
+
+                  abstract void inject(OtherActivity activity);
+
+                  private static MainComponent sComponent;
+                  public static MainComponent getInstance(){
+                      if (sComponent == null){
+                          sComponent = DaggerMainComponent.builder()
+                                  .applicationComponent(MainApplication.getInstance().getApplicationComponent())// 如果依赖关系必须要获取依赖的Component实例对象
+                                  .build();
+                      }
+                      return sComponent;
+                  }
+              }
+
+          -3 包含关系--@SubComponent：
+
+              如果我们需要父组件全部的提供对象，这时我们可以用包含方式而不是用依赖方式，相比于依赖方式，包含方式不需要父组件显式显露对象，
+              就可以拿到父组件全部对象。且SubComponent只需要在父Component接口中声明就可以了。
+
+              Demo:
+                      @Scope
+                      @Retention(RetentionPolicy.RUNTIME)
+                      public @interface AScope {
+                      }
+
+                      @Module
+                      public class AModule {
+
+                          @AScope
+                          @Provides
+                          public Poetry getPoetry(){
+                              return new Poetry("万物美好");
+                          }
+                      }
+
+                      @AScope
+                      @Subcomponent(modules = AModule.class)
+                      public interface AComponent {
+                          void inject(AActivity activity);
+                      }
+
+                      @Singleton
+                      @Component(modules = ApplicationModule.class)
+                      public interface ApplicationComponent {
+
+                          Gson getGson();// 暴露Gson对象接口
+
+                          //AComponent plus();
+                          AComponent plus(AModule module);//添加声明
+                      }
+
+
+                      public class MainApplication extends Application {
+
+                          private ApplicationComponent mApplicationComponent;
+                          private AComponent mAComponent;
+                          private static MainApplication sApplication;
+
+                          public static MainApplication getInstance() {
+                              return sApplication;
+                          }
+                          @Override
+                          public void onCreate() {
+                              super.onCreate();
+                              sApplication = this;
+
+                              mApplicationComponent = DaggerApplicationComponent.builder().build();
+                          }
+
+                          public ApplicationComponent getApplicationComponent() {
+                              return mApplicationComponent;
+                          }
+
+                          public AComponent getAComponent() {
+                              if (mAComponent == null){
+                                  mAComponent = mApplicationComponent.plus(new AModule());
+                              }
+                              return mAComponent;
+                          }
+                      }
+
+                      public class AActivity extends AppCompatActivity {
+                          TextView mTextView;
+
+                          @Inject
+                          Gson mGson;
+
+                          @Inject
+                          Poetry mPoetry;
+
+                          @Override
+                          protected void onCreate(Bundle savedInstanceState) {
+                              super.onCreate(savedInstanceState);
+                              setContentView(R.layout.activity_a);
+
+                              MainApplication.getInstance()
+                                      .getAComponent()
+                                      .inject(this);
+
+                              mTextView = (TextView) findViewById(R.id.text);
+                              String text = mPoetry.getPoems()+",mPoetry:"+mPoetry+(mGson == null ? "Gson没被注入" : "Gson已经被注入");
+                              mTextView.setText(text);
+                          }
+                      }
+
+          -4 @Qualifier注解的使用：
+
+              当一个Module当中同时有两个或者多个方法生成同一类型对象的时候，Dagger2是无法区分调用哪一个方法执行这一类型对象的创建，因此我们需要
+              加入限定符进行修饰，让Dagger2能够区分当前应使用哪一个方法。
+
+              自定义@Qualifier限定符来匹配注入方法了
+
+              @Qualifier
+              @Documented
+              @Retention(RetentionPolicy.RUNTIME)
+              public @interface PoetryQualifier {
+                  String value() default "";
+              }
+
+              @Module
+              public class AModule {
+
+                  @PoetryQualifier("A")
+                  @AScope
+                  @Provides
+                  public Poetry getPoetry(){
+                      return new Poetry("万物美好");
+                  }
+
+                  @PoetryQualifier("B")
+                  @AScope
+                  @Provides
+                  public Poetry getOtherPoetry(){
+                      return new Poetry("我在中间");
+                  }
+              }
+
+              public class AActivity extends AppCompatActivity {
+                  TextView mTextView;
+
+                  @Inject
+                  Gson mGson;
+
+                  // 匹配Module中同样注解的方法
+                  @PoetryQualifier("A")
+                  @Inject
+                  Poetry mPoetry;
+
+                  // 匹配Module中同样注解的方法
+                  @PoetryQualifier("B")
+                  @Inject
+                  Poetry mPoetryB;
+
+                  @Override
+                  protected void onCreate(Bundle savedInstanceState) {
+                      super.onCreate(savedInstanceState);
+                      setContentView(R.layout.activity_a);
+
+                      MainApplication.getInstance()
+                              .getAComponent()
+                              .inject(this);
+
+                      mTextView = (TextView) findViewById(R.id.text);
+                      String text = mPoetry.getPoems()+",mPoetryA:"+mPoetry+
+                              mPoetryB.getPoems()+",mPoetryB:"+mPoetryB+
+                              (mGson == null ? "Gson没被注入" : "Gson已经被注入");
+                      mTextView.setText(text);
+                  }
+              }
+
+
+
+
