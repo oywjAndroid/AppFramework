@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import cn.oywj.newscenter.R;
 import cn.oywj.newscenter.stu.di.MainComponent;
 import cn.oywj.newscenter.stu.di.Property;
+import retrofit2.Retrofit;
 
 public class OtherActivity extends AppCompatActivity {
 
@@ -32,5 +33,6 @@ public class OtherActivity extends AppCompatActivity {
 
         String json = mGson.toJson(mProperty);
         text.setText(json + "," + mProperty);
+
     }
 }

@@ -10,6 +10,8 @@ import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
+import cn.oywj.newscenter.model.http.RetrofitHelper;
+import cn.oywj.newscenter.stu.Bean;
 import cn.oywj.newscenter.stu.activity.OtherActivity;
 import cn.oywj.newscenter.stu.di.MainComponent;
 import cn.oywj.newscenter.stu.di.Property;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         //text.setText(json + "," + mProperty + ";" + ssInt);
         text.setText("one --- " + mPropertyOne.getPropertiesName() + ",two --- " + mPropertyTwo.getPropertiesName());
 
+        // Bean apiEntity = RetrofitHelper.getApiEntity(Bean.class, "");
     }
 
     public void intentOther(View v) {

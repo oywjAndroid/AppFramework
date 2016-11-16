@@ -1,0 +1,306 @@
+--- Retrofit学习笔记
+
+1.Retrofit是啥？
+---- Retrofit 是安卓上最流行的**HTTP Client库**之一，通过接口映射网络请求参数执行网络请求。
+
+2.Retrofit如何使用？
+---- 使用介绍：
+        2.1 了解Retrofit常用的注解：
+            public interface ZhihuService {
+                String baseUrl = "http://news-at.zhihu.com/api/4/";
+
+                // 1.
+                @GET("news/latest")
+                void getNewsLatest();
+
+                // 2.
+                @GET("start-image/1080*1776")
+                Call<StartImageBean> getStartImage();
+
+                // 3.
+                @GET("start-image/{size}")
+                Call<StartImageBean> getStartImageByPath(@Path("size") String size);
+
+                // 4.
+                @POST("test/sayHello")
+                Call<ResultBean> postSayHello(@Query("username") String username, @Query("age") String age);
+
+                // 5.
+                @POST
+                Call<ResultBean> postSayHelloByURL(@Url String url, @Query("username") String username, @Query("age") String age);
+
+                // 6.
+                @FormUrlEncoded
+                @POST("test/sayHello")
+                Call<ResultBean> postSayHelloByForm(@Field("username") String username, @Field("age") String age);
+
+                // 7.
+                @POST("test/sayHi")
+                @Headers("Accept-Encoding: application/json")
+                Call<ResultBean> postSayHi(@Body UserBean userBean);
+
+                // 8.
+                @POST("test/sayHi")
+                @Headers("Accept-Encoding: application/json")
+                Call<ResultBean> postSayHi(@Body UserBean userBean, @Header("city") String city);
+
+                // 9.
+                @Multipart
+                @POST("test/upload")
+                Call<ResultBean> upload(@Part("file\";filename=\"launcher_icon.png") RequestBody file);
+
+                // 10.
+                @Streaming
+                @GET
+                Call<ResponseBody> downloadFileByDynamicUrlAsync(@Url String downloadUrl);
+            }
+
+           上面的代码包含了GET、POST请求,理解这里的内容主要需要理解主要的注解的意义。
+            - @GET:代表的是GET请求。
+            - @POST:代表的是POST请求。
+            - @Path:可以动态指定字符串。
+            - @Query:可以指定需要传递的键值对属性参数。
+            - @Url:可指定网络请求的URL地址。
+            - @Field:作用类似于Query，但是在使用此注解的时候需要在函数声明@FormUrlEncoded，否则会报错。
+            - @Headers:代表的是请求头。
+            - @Body:如果传递的请求体数据使用的是对象的封装可以使用此注解。
+            - @Multipart:代表的是传递多种媒介数据。
+            - @Part:代表传递的媒介数据。
+            - @Streaming:支持流形式操作。
+
+        2.2 使用Retrofit演示：
+
+            Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(请求地址)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+            ZhihuService service = retrofit.create(ZhihuService.class);
+            retrofit.Call<返回实体> repos = service.请求的接口名称(请求参数);
+            repos.enqueue(new retrofit.Callback<返回实体>() {
+
+                 @Override
+                 public void onResponse(retrofit.Response<返回实体> response, Retrofit retrofit) {
+                       返回实体 body = response.body();
+                       LogUtil.i(TAG, body.toString());
+                 }
+
+                 @Override
+                 public void onFailure(Throwable throwable) {
+                       // TODO Auto-generated method stub
+                 }
+            });
+
+3.Retrofit原理剖析：
+
+    3.1 参数配置：使用了Builder模式进行参数配置(baseUrl,ConverterFactory,CallAdapterFactory,client,CallFactory等)。
+
+    3.2 retrofit.create(Xyyy.class) : Retrofit的关键就在这个create方法
+
+        3.2.1 如何利用某接口Class对象生成其实现类对象？
+
+            --> Retrofit研究的入口：
+                return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
+                    new InvocationHandler() {
+                      private final Platform platform = Platform.get();
+
+                      @Override public Object invoke(Object proxy, Method method, Object... args)
+                          throws Throwable {
+                        // If the method is a method from Object then defer to normal invocation.
+                        if (method.getDeclaringClass() == Object.class) {
+                          return method.invoke(this, args);
+                        }
+                        if (platform.isDefaultMethod(method)) {
+                          return platform.invokeDefaultMethod(method, service, proxy, args);
+                        }
+                        ServiceMethod serviceMethod = loadServiceMethod(method);
+                        OkHttpCall okHttpCall = new OkHttpCall<>(serviceMethod, args);
+                        return serviceMethod.callAdapter.adapt(okHttpCall);
+                      }
+                    });
+
+            1.调用Proxy.newProxyInstance()生成代理类对象，这个时候问题就来了它是如何获取到接口中的请求参数信息？
+
+                    --> public static Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces,
+                                                              InvocationHandler invocationHandler)
+                                throws IllegalArgumentException {
+
+                            if (invocationHandler == null) {
+                                throw new NullPointerException("invocationHandler == null");
+                            }
+                            Exception cause;
+                            try {
+                                return getProxyClass(loader, interfaces)
+                                        .getConstructor(InvocationHandler.class)
+                                        .newInstance(invocationHandler);
+                            } catch (NoSuchMethodException e) {
+                                cause = e;
+                            } catch (IllegalAccessException e) {
+                                cause = e;
+                            } catch (InstantiationException e) {
+                                cause = e;
+                            } catch (InvocationTargetException e) {
+                                cause = e;
+                            }
+                            AssertionError error = new AssertionError();
+                            error.initCause(cause);
+                            throw error;
+                        }
+
+                    --> getProxyClass(loader, interfaces)
+                          .getConstructor(InvocationHandler.class)
+                          .newInstance(invocationHandler);
+
+                    ****通过动态代理和反射技术来生成指定接口的代理实现类****
+
+            2.调用loadServiceMethod(Method method);//将接口中的方法调用适配成Http调用
+                    -->  关键代码:
+                         1.获取接口方法的返回类型
+                         Type returnType = method.getGenericReturnType();
+                         2.获取接口方法中注解信息
+                         Annotation[] annotations = method.getAnnotations();
+                         3.创建CallAdapter对象
+                         return retrofit.callAdapter(returnType, annotations);
+
+                         ****根据返回类型以及注解信息创建CallAdapter对象****
+
+            3.那么什么是CallAdapter呢？CallAdapter有什么作用呢？
+
+                    3.1 关于CallAdapter接口：
+                        interface CallAdapter<T>{
+
+                            // 1.网络响应体的类型
+                            Type responseType();
+
+                            // 2.将网络请求的Call对象转换为指定的对象
+                            <R> T adapt(Call<R> call);
+
+                            // 3.生成CallAdapter对象的工厂类
+                            abstract class Factory {
+
+                                public abstract CallAdapter<?> get(Type returnType, Annotation[] annotations,
+                                    Retrofit retrofit);
+
+                                protected static Type getParameterUpperBound(int index, ParameterizedType type) {
+                                  return Utils.getParameterUpperBound(index, type);
+                                }
+
+                                protected static Class<?> getRawType(Type type) {
+                                  return Utils.getRawType(type);
+                                }
+                            }
+                        }
+
+                    3.2 Retrofit默认的CallAdapter --- DefaultCallAdapterFactory:
+
+                        final class DefaultCallAdapterFactory extends CallAdapter.Factory {
+                          static final CallAdapter.Factory INSTANCE = new DefaultCallAdapterFactory();
+
+                          @Override
+                          public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+                            if (getRawType(returnType) != Call.class) {
+                              return null;
+                            }
+
+                            final Type responseType = Utils.getCallResponseType(returnType);
+                            return new CallAdapter<Call<?>>() {
+                              @Override
+                              public Type responseType() {
+                                return responseType;
+                              }
+
+                              @Override
+                              public <R> Call<R> adapt(Call<R> call) {
+                                return call;
+                              }
+                            };
+                          }
+                        }
+
+                        从这段源码可以看出CallAdapter -> adapt()返回的类型就是接口方法定义的类型，所以当我们使用的是默认的CallAdapter
+                        执行网络请求，最后接口方法返回的必然是一个*Call<T>*对象。
+                        -------
+                        OkHttpCall okHttpCall = new OkHttpCall<>(serviceMethod, args);
+                        return serviceMethod.callAdapter.adapt(okHttpCall);
+
+                        如果使用默认的CallAdapter，Retrofit经过上述的一系列操作之后给你封装好了具有详细信息的Call对象，至于Call请求的发起是交给
+                        用户自己完成。
+                        -------
+
+                    3.3 Retrofit与RxJava的结合使用(RxJavaCallAdapterFactory)
+
+                        经过上述的分析，大家应该知道了CallAdapter的作用就是用来将 Call<T> --适配成--> T(某类型对象)。
+
+                        RxJavaCallAdapterFactory:
+                        --> 主要为了创建 CallAdapter<Observable<T>> ，也就是能够将Call --适配成--> Observable<T>.
+
+                        主要代码如下：
+
+                        ----> 这是CallAdapterFactory 获取CallAdapter实例的方法
+                              @Override
+                              public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+                                // 1.获取返回类型的字节码对象
+                                Class<?> rawType = getRawType(returnType);
+                                // 2.获取返回类型的规范名称(该类的全称 -- 包名 + Xxx)
+                                String canonicalName = rawType.getCanonicalName();
+                                boolean isSingle = "rx.Single".equals(canonicalName);
+                                boolean isCompletable = "rx.Completable".equals(canonicalName);
+                                // 3.如果返回的类型不是Observable直接返回null
+                                if (rawType != Observable.class && !isSingle && !isCompletable) {
+                                  return null;
+                                }
+                                // 4.如果返回的类型不是带有泛型参数(Observable<T>)的直接报错.
+                                if (!isCompletable && !(returnType instanceof ParameterizedType)) {
+                                  String name = isSingle ? "Single" : "Observable";
+                                  throw new IllegalStateException(name + " return type must be parameterized"
+                                      + " as " + name + "<Foo> or " + name + "<? extends Foo>");
+                                }
+
+                                if (isCompletable) {
+                                  // Add Completable-converter wrapper from a separate class. This defers classloading such that
+                                  // regular Observable operation can be leveraged without relying on this unstable RxJava API.
+                                  // Note that this has to be done separately since Completable doesn't have a parametrized
+                                  // type.
+                                  return CompletableHelper.createCallAdapter(scheduler);
+                                }
+                                // 5.主要关注的是这个方法getCallAdapter,这个方法会根据返回类型不同而创建不同的适配器
+                                CallAdapter<Observable<?>> callAdapter = getCallAdapter(returnType, scheduler);
+                                if (isSingle) {
+                                  // Add Single-converter wrapper from a separate class. This defers classloading such that
+                                  // regular Observable operation can be leveraged without relying on this unstable RxJava API.
+                                  return SingleHelper.makeSingle(callAdapter);
+                                }
+                                return callAdapter;
+                              }
+
+                        ---> getCallAdapter(returnType,scheduler)
+                        // 下面是关键的几个代码片段：
+
+                                // 1.判断CallAdapter<Observable<T>>中的Observable的泛型参数是否为Response类型
+                                if (rawObservableType == Response.class) {
+                                      if (!(observableType instanceof ParameterizedType)) {
+                                        throw new IllegalStateException("Response must be parameterized"
+                                        + " as Response<Foo> or Response<? extends Foo>");
+                                       }
+                                      Type responseType = getParameterUpperBound(0, (ParameterizedType) observableType);
+                                      // 1.1 如果是的话就创建ResponseCallAdapter
+                                      return new ResponseCallAdapter(responseType, scheduler);
+                                }
+
+                                // 2.判断Observable的泛型参数是否为Result类型
+                                if (rawObservableType == Result.class) {
+                                      if (!(observableType instanceof ParameterizedType)) {
+                                        throw new IllegalStateException("Result must be parameterized"
+                                            + " as Result<Foo> or Result<? extends Foo>");
+                                      }
+                                      Type responseType = getParameterUpperBound(0, (ParameterizedType) observableType);
+                                      // 2.1 如果为Result类型就创建ResultCallAdapter
+                                      return new ResultCallAdapter(responseType, scheduler);
+                                }
+
+                                // 3.如果泛型参数不是上述的两种类型就创建SimpleCallAdapter
+                                return new SimpleCallAdapter(observableType, scheduler);
+
+
+                        --> 最终得到了Observable<T>对象。
+
+

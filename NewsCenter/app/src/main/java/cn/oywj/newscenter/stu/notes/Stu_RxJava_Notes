@@ -1,0 +1,20 @@
+--- RxJava学习笔记：
+
+1.什么是响应式编程？
+
+    响应式编程是一种面向数据流和变化传播的编程范式。
+    这意味着可以在编程语言中很方便地表达静态或动态的数据流，而相关的计算模型会自动将变化的值通过数据流进行传播。
+
+2.RxJava的介绍：
+
+    RxJava最核心的两个东西是Observables（被观察者，事件源）和Subscribers（观察者）。
+    Observables发出一系列事件，Subscribers处理这些事件。这里的事件可以是任何你感兴趣的东西（触摸事件，web接口调用返回的数据。。。）
+
+    一个Observable可以发出零个或者多个事件，知道结束或者出错。
+    每发出一个事件，就会调用它的Subscriber的onNext方法，最后调用Subscriber.onNext()或者Subscriber.onError()结束。
+
+    RxJava的看起来很像设计模式中的观察者模式，但是有一点明显不同，那就是如果一个Observable没有任何的的Subscriber，那么这个Observable是不会发出任何事件的。
+
+3.如何利用RxJava进行响应式编程？
+
+   可查看{link --> RxJavaDemo1}里面有RxJava使用详解。
