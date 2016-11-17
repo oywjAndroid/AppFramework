@@ -15,10 +15,10 @@ import dagger.Provides;
  * instructions:* AppModule -- Dagger2中的Module类，用于为指定Component提供注入所需的对象 *
  */
 @Module
-public class AppModule {
+public class AppModules {
     private App mApplication;
 
-    public AppModule(App application) {
+    public AppModules(App application) {
         mApplication = application;
     }
 

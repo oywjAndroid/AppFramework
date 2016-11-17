@@ -9,6 +9,9 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import cn.oywj.newscenter.app.App;
+import cn.oywj.newscenter.di.component.ActivityComponents;
+import cn.oywj.newscenter.di.component.DaggerActivityComponents;
+import cn.oywj.newscenter.di.module.ActivityModules;
 
 /**
  * projectName:NewsCenter
@@ -74,6 +77,22 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     }
 
     /**
+     * 获取Activity的依赖注入连接器(Component)
+     *
+     * @return ActivityComponents
+     */
+    protected ActivityComponents getActivityComponents() {
+        return DaggerActivityComponents.builder()
+                .appComponents(App.getAppComponents())
+                .activityModules(getActivityModules())
+                .build();
+    }
+
+    protected ActivityModules getActivityModules() {
+        return new ActivityModules(this);
+    }
+
+    /**
      * 获取该Activity对应的内容布局Id
      *
      * @return layoutId
@@ -81,7 +100,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     protected abstract int getLayoutId();
 
     /**
-     * 执行依赖注入动作
+     * 初始化Dagger2的依赖注入动作
      */
     protected abstract void initInject();
 

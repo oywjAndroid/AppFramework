@@ -25,7 +25,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * author：欧阳维骏
  * instructions:*Retrofit的使用帮助类*
  * ---首先需要清楚的是该项目对于网络请求有哪些需求：
- * ------ 1.
+ * ------ 1.添加网络数据的缓存，并且设置只有在没有网络的情况下才读取缓存。
+ * ------ 2.设置网络超时时间，缓存读取超时时间。
  */
 public final class RetrofitHelper {
     private static OkHttpClient mHttpClient;
@@ -89,6 +90,14 @@ public final class RetrofitHelper {
         mHttpClient = builder.build();
     }
 
+    /**
+     * 获取Api接口的实体对象
+     *
+     * @param clazz   Api接口Class对象
+     * @param baseUrl Api接口的基本Url地址
+     * @param <Api>   具体的Api接口类型
+     * @return Api接口的实现类
+     */
     public static <Api> Api getApiEntity(Class<Api> clazz, String baseUrl) {
         Retrofit.Builder builder = new Retrofit.Builder();
         Retrofit retrofit = builder.baseUrl(baseUrl)

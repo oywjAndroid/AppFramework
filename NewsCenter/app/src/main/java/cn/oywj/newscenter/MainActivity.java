@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         //text.setText(json + "," + mProperty + ";" + ssInt);
         text.setText("one --- " + mPropertyOne.getPropertiesName() + ",two --- " + mPropertyTwo.getPropertiesName());
 
-        // Bean apiEntity = RetrofitHelper.getApiEntity(Bean.class, "");
+        // Bean apiEntity = RetrofitHelper.getApiEntity(Bean.class, "http://www.baidu.com/");
     }
 
     public void intentOther(View v) {

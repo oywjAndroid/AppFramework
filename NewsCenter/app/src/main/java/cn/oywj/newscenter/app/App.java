@@ -8,13 +8,12 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.google.gson.Gson;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-
+import cn.oywj.newscenter.di.component.AppComponents;
+import cn.oywj.newscenter.di.component.DaggerAppComponents;
+import cn.oywj.newscenter.di.module.AppModules;
 import cn.oywj.newscenter.stu.di.AppComponent;
 import cn.oywj.newscenter.stu.di.AppModule;
 import cn.oywj.newscenter.stu.di.DaggerAppComponent;
@@ -50,9 +49,6 @@ public class App extends Application {
         instance = this;
         //初始化屏幕宽高
         getScreenSize();
-
-        getAppComponent();
-
     }
 
     public void addActivity(Activity act) {
@@ -96,11 +92,14 @@ public class App extends Application {
         }
     }
 
-    public static AppComponent getAppComponent(){
-        return DaggerAppComponent.builder()
-                //.appModule(new AppModule())
+    public static AppComponents getAppComponents() {
+        return DaggerAppComponents.builder()
+                .appModules(new AppModules(instance))
                 .build();
     }
 
-
+    // STU TEST:
+    public static AppComponent getAppComponent() {
+        return DaggerAppComponent.builder().build();
+    }
 }
