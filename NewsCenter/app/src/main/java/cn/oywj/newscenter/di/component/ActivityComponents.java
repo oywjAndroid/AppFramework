@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import cn.oywj.newscenter.di.ActivityScope;
 import cn.oywj.newscenter.di.module.ActivityModules;
+import cn.oywj.newscenter.ui.main.activity.WelcomeActivity;
 import dagger.Component;
 
 /**
@@ -19,5 +20,7 @@ import dagger.Component;
 public interface ActivityComponents {
 
     Activity getActivty();
+
+    void inject(WelcomeActivity welcome);
 
 }

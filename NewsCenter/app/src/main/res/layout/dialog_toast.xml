@@ -8,5 +8,5 @@
     android:gravity="center"
     android:padding="@dimen/content_padding"
     android:text="当前已是最新版本"
-    android:textColor="#5f5f5f"
+    android:textColor="#ffffff"
     android:textSize="16sp" />

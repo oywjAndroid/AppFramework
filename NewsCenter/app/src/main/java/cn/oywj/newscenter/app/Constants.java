@@ -11,6 +11,8 @@ import java.io.File;
  */
 public interface Constants {
 
+    String API_KEY = "d270865499a53085c5267f9d5c1fea5e";
+
     String PATH_DATA = App.getInstance().getCacheDir().getAbsolutePath() + File.separator + "data";
 
     String PATH_CACHE = PATH_DATA + File.separator + "NetCache";

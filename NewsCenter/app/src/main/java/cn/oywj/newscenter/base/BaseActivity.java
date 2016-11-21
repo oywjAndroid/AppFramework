@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import javax.inject.Inject;
 
@@ -37,7 +39,7 @@ import cn.oywj.newscenter.di.module.ActivityModules;
  * <p>
  * *
  */
-public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity implements BaseView {
+public abstract class BaseActivity<P extends BasePresenter> extends Activity implements BaseView {
 
     protected Activity mActivity;
 
@@ -76,6 +78,18 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         App.getInstance().removeActivity(this);
     }
 
+//    protected void setToolBar(Toolbar toolbar, String title) {
+//        toolbar.setTitle(title);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayShowHomeEnabled(true);
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                onBackPressed();
+//            }
+//        });
+//    }
     /**
      * 获取Activity的依赖注入连接器(Component)
      *
@@ -115,4 +129,6 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
                 : AppCompatDelegate.MODE_NIGHT_NO);
         recreate();
     }
+
+
 }

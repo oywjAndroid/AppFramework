@@ -33,8 +33,8 @@ public final class RetrofitHelper {
     private static Interceptor mCacheInterceptor;
 
     static {
-        initOkHttpClient();
         initCacheInterceptor();
+        initOkHttpClient();
     }
 
     private static void initCacheInterceptor() {
