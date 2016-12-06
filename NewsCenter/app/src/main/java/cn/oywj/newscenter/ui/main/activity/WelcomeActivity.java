@@ -1,8 +1,6 @@
 package cn.oywj.newscenter.ui.main.activity;
 
-import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -14,6 +12,7 @@ import cn.oywj.newscenter.model.bean.WelcomeBean;
 import cn.oywj.newscenter.presenter.WelcomePresenter;
 import cn.oywj.newscenter.presenter.contract.WelcomeContract;
 import cn.oywj.newscenter.utils.ToastUtil;
+import cn.oywj.newscenter.utils.Utils;
 
 /**
  * projectName:NewsCenter
@@ -57,7 +56,6 @@ public class WelcomeActivity extends BaseActivity<WelcomePresenter> implements W
 
     @Override
     public void showContent(WelcomeBean welcomeBean) {
-        Log.d(TAG, "mImageView == null ? " + (mImageView == null));
         if (mImageView != null) {
             Glide.with(mActivity).load(welcomeBean.newslist.get(0).picUrl).crossFade().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(mImageView);
             mImageView.animate().scaleX(1.12f).scaleY(1.12f).setDuration(2000).setStartDelay(100).start();
@@ -66,7 +64,7 @@ public class WelcomeActivity extends BaseActivity<WelcomePresenter> implements W
 
     @Override
     public void jumpToMain() {
-//        Utils.start_Activity(this,);
+        Utils.start_Activity(this, MainActivities.class);
     }
 
     @Override

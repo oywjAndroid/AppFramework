@@ -39,7 +39,7 @@ import cn.oywj.newscenter.di.module.ActivityModules;
  * <p>
  * *
  */
-public abstract class BaseActivity<P extends BasePresenter> extends Activity implements BaseView {
+public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity implements BaseView {
 
     protected Activity mActivity;
 
@@ -90,6 +90,7 @@ public abstract class BaseActivity<P extends BasePresenter> extends Activity imp
 //            }
 //        });
 //    }
+
     /**
      * 获取Activity的依赖注入连接器(Component)
      *

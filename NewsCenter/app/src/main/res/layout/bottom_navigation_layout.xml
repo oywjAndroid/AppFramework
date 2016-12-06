@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <cn.oywj.newscenter.widget.navigation.GradientGroup
+        android:id="@+id/gradient_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/color_f7f7f7f"
+        android:paddingBottom="@dimen/dp_2"
+        android:paddingTop="@dimen/dp_3"
+        >
+
+        <cn.oywj.newscenter.widget.navigation.GradientButton
+            android:id="@+id/gradient_btn_one"
+            android:layout_width="@dimen/min_dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:drawablePadding="@dimen/dp_3"
+            android:text="@string/home_string"
+            android:textColor="@color/color_BFBFBF"
+            android:textSize="@dimen/sp_10"
+            app:drawable_general="@mipmap/browse"
+            app:drawable_select="@mipmap/browse_on"
+            app:textColor_select="@color/color_2083D2"
+            />
+
+        <cn.oywj.newscenter.widget.navigation.GradientButton
+            android:id="@+id/gradient_btn_two"
+            android:layout_width="@dimen/min_dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/dp_3"
+            android:text="@string/play_string"
+            android:textColor="@color/color_BFBFBF"
+            android:textSize="@dimen/sp_10"
+            app:drawable_general="@mipmap/play"
+            app:drawable_select="@mipmap/play_on"
+            app:textColor_select="@color/color_2083D2"
+            />
+
+        <cn.oywj.newscenter.widget.navigation.GradientButton
+            android:id="@+id/gradient_btn_three"
+            android:layout_width="@dimen/min_dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/dp_3"
+            android:text="@string/map_string"
+            android:textColor="@color/color_BFBFBF"
+            android:textSize="@dimen/sp_10"
+            app:drawable_general="@mipmap/discover"
+            app:drawable_select="@mipmap/discover_on"
+            app:textColor_select="@color/color_2083D2"
+            />
+
+        <cn.oywj.newscenter.widget.navigation.GradientButton
+            android:id="@+id/gradient_btn_four"
+            android:layout_width="@dimen/min_dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/dp_3"
+            android:text="@string/chat_string"
+            android:textColor="@color/color_BFBFBF"
+            android:textSize="@dimen/sp_10"
+            app:drawable_general="@mipmap/info"
+            app:drawable_select="@mipmap/info_on"
+            app:textColor_select="@color/color_2083D2"
+            />
+
+
+    </cn.oywj.newscenter.widget.navigation.GradientGroup>
+
+</merge>

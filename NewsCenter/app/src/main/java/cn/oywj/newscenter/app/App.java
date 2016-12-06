@@ -15,7 +15,6 @@ import cn.oywj.newscenter.di.component.AppComponents;
 import cn.oywj.newscenter.di.component.DaggerAppComponents;
 import cn.oywj.newscenter.di.module.AppModules;
 import cn.oywj.newscenter.stu.di.AppComponent;
-import cn.oywj.newscenter.stu.di.AppModule;
 import cn.oywj.newscenter.stu.di.DaggerAppComponent;
 
 /**

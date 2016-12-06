@@ -1,6 +1,7 @@
 package cn.oywj.newscenter;
 
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -46,12 +47,6 @@ public class MainActivity extends AppCompatActivity {
         //String json = mGson.toJson(mProperty);
         //text.setText(json + "," + mProperty + ";" + ssInt);
         text.setText("one --- " + mPropertyOne.getPropertiesName() + ",two --- " + mPropertyTwo.getPropertiesName());
-
         // Bean apiEntity = RetrofitHelper.getApiEntity(Bean.class, "http://www.baidu.com/");
-    }
-
-    public void intentOther(View v) {
-        Intent intent = new Intent(MainActivity.this, OtherActivity.class);
-        startActivity(intent);
     }
 }

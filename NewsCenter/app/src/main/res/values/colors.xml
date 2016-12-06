@@ -4,4 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="toast_bg">#90000000</color>
+    <color name="color_BFBFBF">#bfbfbf</color>
+    <color name="color_2083D2">#2083d2</color>
+    <color name="color_2C2C2C">#2c2c2c</color>
+    <color name="color_15000000">#15000000</color>
+    <color name="color_f7f7f7f">#f7f7f7</color>
 </resources>

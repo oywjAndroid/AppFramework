@@ -1,6 +1,7 @@
 package cn.oywj.newscenter.presenter;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -10,10 +11,10 @@ import cn.oywj.newscenter.model.bean.WelcomeBean;
 import cn.oywj.newscenter.model.http.RetrofitHelper;
 import cn.oywj.newscenter.model.http.WelcomeApi;
 import cn.oywj.newscenter.presenter.contract.WelcomeContract;
+import cn.oywj.newscenter.utils.RxUtils;
+import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * projectName:NewsCenter
@@ -43,20 +44,36 @@ public class WelcomePresenter extends RxBasePresenter<WelcomeContract.ViewContra
         mParamMap.put("num", 1);
         mParamMap.put("rand", 1);
         Subscription subscription = mWelcomeApi.getWelcomeImage(mParamMap)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<WelcomeBean>() {
-                            @Override
-                            public void call(WelcomeBean welcomeBean) {
-                                mView.showContent(welcomeBean);
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                mView.useErrorView(true, throwable.toString());
-                                throwable.printStackTrace();
-                            }
-                        });
+                .compose(RxUtils.rxSchedulerHelper())
+                .subscribe(new Action1<WelcomeBean>() {
+                    @Override
+                    public void call(WelcomeBean welcomeBean) {
+                        mView.showContent(welcomeBean);
+                        timerTask();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        mView.useErrorView(false, throwable.getMessage());
+                        throwable.printStackTrace();
+                        timerTask();
+                    }
+                });
         addSubscription(subscription);
+    }
+
+    /**
+     * 执行定时任务
+     */
+    private void timerTask() {
+        Subscription subscribe = Observable.timer(2000, TimeUnit.MILLISECONDS)
+                .compose(RxUtils.rxSchedulerHelper())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        mView.jumpToMain();
+                    }
+                });
+        addSubscription(subscribe);
     }
 }

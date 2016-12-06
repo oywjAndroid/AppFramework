@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cn.oywj.newscenter.MainActivity"
     >
 
@@ -19,9 +16,40 @@
         android:text="Hello World!"
         />
 
-    <Button
+    <cn.oywj.newscenter.stu.view.navigate.NavigateView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:normal_icons="@mipmap/choiceness_on"
+        app:select_icons="@mipmap/choiceness_on"
+        />
+
+    <!--<Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="intentOther"
         android:text="OtherActivity"
-        android:onClick="intentOther"/>
+        />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/duihg"
+        android:gravity="left"
+        android:text="点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形点9图片不变形"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/duihg"
+        android:gravity="left"
+        android:text="变形"
+        />-->
+
+    <!--<cn.oywj.newscenter.stu.view.DrawDemo
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />-->
+
 </LinearLayout>

@@ -9,10 +9,6 @@ import android.widget.Toast;
 import cn.oywj.newscenter.R;
 import cn.oywj.newscenter.app.App;
 
-
-/**
- * Created by codeest on 2016/8/4.
- */
 public class ToastUtil {
 
     static ToastUtil td;

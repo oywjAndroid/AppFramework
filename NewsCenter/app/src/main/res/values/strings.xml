@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">NewsCenter</string>
+    <string name="home_string">首页</string>
+    <string name="play_string">视频</string>
+    <string name="map_string">地图</string>
+    <string name="chat_string">交友</string>
 </resources>

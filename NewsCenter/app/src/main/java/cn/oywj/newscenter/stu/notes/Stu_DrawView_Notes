@@ -1,0 +1,133 @@
+
+一、关于使用Scroller类进行滚动操作：
+
+    1.使用Scroller需要了解的基本概念：
+
+        1.1 关于Scroller类的介绍：
+
+            Scroller类本身是无法操作View的滚动，它只是记录当前View的一些位置、速度、插值器等内容信息，利用它可以将两个位置之间的
+            的位移距离拆分成众多片段距离从而达到自己想要的滚动效果。
+
+        1.2 关于使用View的scrollTo()、scrollBy()的滑动：
+
+            View{
+                 ...
+                 int mScrollX;
+
+                 int mScrollY;
+                 ...
+            }
+
+            View中有两个变量用来标识View的内容的偏移量，例如：TextView进行( scrollTo() || scrollBy() )滑动的是TextView滑动的文本，
+            ViewGroup进行( scrollTo() || scrollBy() )滑动的是childView。
+            scrollTo(): 是以初始位置为起点进行滑动。
+            scrollBy(): 是以上一次位置为起点进行滑动。
+
+    2.Scroller结合scrollTo||scrollBy进行平滑滚动：
+        computeScroll()调用发生在View的重绘时段：
+            ViewGroup:
+                    ---> dispatchDraw():
+                                  ---> childDraw():
+                                              ---> View -> draw()
+                                                            ---> computeScroll()
+
+        当我们需要执行一段距离的平滑滚动时，我们可将这段距离的起点、终点信息设置到Scroller中，
+        然后在computeScroll()中去判断mScroller.computeScrollOffset()是否返回true,如果返回true,说明Scroller已经为我们需要
+        平滑滚动的距离生成了多个平滑段距离，然后根据这个平滑段距离再去scrollTo() || scrollBy()进行滚动。
+        mScroller.computeScrollOffset() --> 是否具有偏移量
+
+二、关于Canvas详解：
+
+    1.绘制图形的三要素：Canvas、图形的坐标系、Paint
+
+        1.1 Canvas坐标系
+                Canvas坐标系指的是Canvas本身的坐标系，Canvas坐标系有且只有一个，且是唯一不变的，
+            其坐标原点在View的左上角，从坐标原点向右为x轴的正半轴，从坐标原点向下为y轴的正半轴。
+
+        1.2 绘图坐标系
+                Canvas的drawXXX方法中传入的各种坐标指的都是绘图坐标系中的坐标，而非Canvas坐标系中的坐标。
+            默认情况下，绘图坐标系与Canvas坐标系完全重合，即初始状况下，绘图坐标系的坐标原点也在View的左上角，
+            从原点向右为x轴正半轴，从原点向下为y轴正半轴。但不同于Canvas坐标系，绘图坐标系并不是一成不变的，
+            可以通过调用Canvas的translate方法平移坐标系，可以通过Canvas的rotate方法旋转坐标系，还可以通过Canvas的scale方法缩放坐标系，
+            而且需要注意的是，translate、rotate、scale的操作都是基于当前绘图坐标系的，而不是基于Canvas坐标系，
+            一旦通过以上方法对坐标系进行了操作之后，当前绘图坐标系就变化了，以后绘图都是基于更新的绘图坐标系了。
+            也就是说，真正对我们绘图有用的是绘图坐标系而非Canvas坐标系。
+
+    2.关于CanvasAPI的介绍：
+
+        1.1 drawARGB():绘制整个Canvas的ARGB色
+
+        ------
+        canvas.translate();
+        canvas.rotate();
+        canvas.clipRect();
+        canvas.save()和canvas.restore();
+        PorterDuffXfermode
+        Bitmap和Matrix
+        Shader --- 着色器，用于图形的渲染
+        paint.setShader();
+                BitmapShader———图像渲染
+                LinearGradient——–线性渲染
+                RadialGradient——–环形渲染
+                SweepGradient——–扫描渲染
+                ComposeShader——组合渲染
+
+        PathEffect;
+                CornerPathEffect
+                用平滑的方式衔接Path的各部分
+                DashPathEffect
+                将Path的线段虚线化
+                PathDashPathEffect
+                与DashPathEffect效果类似但需要自定义路径虚线的样式
+                DiscretePathEffect
+                离散路径效果
+                ComposePathEffect
+                两种样式的组合。先使用第一种效果然后在此基础上应用第二种效果
+                SumPathEffect
+                两种样式的叠加。先将两种路径效果叠加起来再作用于Path
+
+三、实现类似微信底部导航栏(GradientButton & GradientGroup)的心得：
+
+    1.这个效果让我感触最深的就是加深了我对自定义View中的绘制部分的知识点有了更加深入理解：
+
+      1.1 Canvas的各种绘制方法的使用：
+            1.绘制Bitmap：
+            canvas.drawBitmap(Bitmap bitmap,int left,int top,Paint paint);
+            canvas.drawBitmap(Bitmap bitmap,Matrix matrix,Paint paint);
+            第一个drawBitmap()直接在某个点(left,top)绘制Bitmap.
+            第二个drawBitmap()通过使用Matrix将原图进行平移、缩放、渐变等矩阵变换之后在进行Bitmap的绘制.
+
+            2.通过Canvas创建Bitmap:
+            // 创建一个具有指定像素大小的可变位图
+            Bitmap bitmap = Bitmap.create(int width,int height,Config config);
+            // 将这个可变位图指定一个Canvas
+            Canvas canvas = new Canvas(bitmap);
+            // 之后可在canvas上面进行绘图操作，绘制完成的图片信息会被保存到bitmap中.
+            // 如：drawable.draw(canvas),canvas.drawXXX()...
+
+            3.绘制圆角矩形：
+            canvas.drawRoundRect(RectF rect,float rx,float ry,Paint paint);
+            RectF --- > 用于指定这个矩形的：(left , top , right , bottom)
+            通过这个方法来绘制圆形：原理就是利用了正方形的内切圆
+            所以如果需要绘制圆形，可以直接传入一个保存了正方形的RectF对象，然后rx、ry就是RectF.centerX()，RectF.centerY()。
+
+            4.绘制文本：
+            canvas.drawText(String text, int start, int end, float x, float y,Paint paint)
+            要想正确的绘制文本必须要理解 -- FontMetrics:
+                FontMetrics属性
+                1. 基准点是baseline
+
+                2. Ascent是baseline之上至字符最高处的距离
+
+                3. Descent是baseline之下至字符最低处的距离
+
+                4. Leading文档说的很含糊，其实是上一行字符的descent到下一行的ascent之间的距离
+
+                5. Top指的是指的是最高字符到baseline的值，即ascent的最大值
+
+                6. 同上，bottom指的是最下字符到baseline的值，即descent的最大值
+             可参考GradientButton中的代码。
+
+      1.2 Paint中PorterDuffXfermode设置:
+
+           主要用来设置两个图片的叠加使用，具体可参考：https://gold.xitu.io/entry/57465c88c4c971005d6e4422

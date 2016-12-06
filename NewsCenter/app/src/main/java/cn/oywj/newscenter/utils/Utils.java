@@ -12,9 +12,17 @@ import android.content.Intent;
  */
 public class Utils {
 
+    /**
+     * 执行不带参数的跳转页面，使用了淡入淡出的切换动画
+     *
+     * @param activity
+     * @param cls
+     */
     public static void start_Activity(Activity activity, Class<?> cls) {
         Intent intent = new Intent();
         intent.setClass(activity, cls);
         activity.startActivity(intent);
+        activity.finish();
+        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

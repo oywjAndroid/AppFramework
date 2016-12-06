@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GradientButton">
+        <attr name="textColor_select" format="color"/>
+        <attr name="drawable_general" format="reference"/>
+        <attr name="drawable_select" format="reference"/>
+        <attr name="textSize_badge" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="NavigateView">
+        <attr name="normal_icons" format="reference"/>
+        <attr name="select_icons" format="reference"/>
+    </declare-styleable>
+</resources>
