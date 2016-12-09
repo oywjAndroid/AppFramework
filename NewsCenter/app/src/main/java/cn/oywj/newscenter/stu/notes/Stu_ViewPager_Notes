@@ -1,0 +1,80 @@
+1.关于ViewPager源码学习：
+
+    1.1 ViewPager extends ViewGroup ;
+
+    1.2 ViewPager 初始化：
+
+        initViewPager()：该方法执行了ViewPager的初始化动作，用于初始化
+        mScroller、mTouchSlop、mMinimumVelocity、mMaximumVelocity
+        mLeftEdge、mRightEdge、mFlingDistance、mCloseEnough、mDefaultGutterSize等于用于滑动的基础变量。
+
+    1.3 ViewPager onMeasure():
+
+        1. setMeasuredDimension(getDefaultSize(0, widthMeasureSpec),getDefaultSize(0, heightMeasureSpec));
+            ViewPager 一执行测量就进行容器自身大小的设置。
+
+        2. 在确定自身大小之后我们发现，ViewPager在准备child View 的测量，那么疑问就来了：
+            ?*1: ViewPager的childView从何处传递过来?
+                 setAdapter(),在我们创建PagerAdapter子类的时候我们复写了
+                 - Object instantiateItem(ViewGroup container,int position)
+                    实例化Item，我们一般在这个方法创建ViewPager每个页面的View
+                 - destroyItem(ViewGroup container, int position, Object object)
+                 - isViewFromObject(View view, Object object)
+                 - int getCount()
+
+        3. 既然ChildView来自于PagerAdapter,那么看setAdapter()源码：
+
+            3.1 检测ViewPager之前是否已经持有了PagerAdapter;如果之前持有，那么清空之前持有的PagerAdapter,否则直接进行数据的填充。
+
+            3.2 填充数据有populate()方法实现 ---> populate() ---> populate(int newCurPosition)
+
+                 populate(int newCurPosition):
+                    // 1.get old ItemInfo
+                    if (mCurItem != newCurrentItem) {
+                             oldCurInfo = infoForPosition(mCurItem);
+                             mCurItem = newCurrentItem;
+                    }
+
+                    ...
+
+                    // 2.根据mOffscreenPageLimit(偏移页面限制数)计算出偏移页面position
+                    final int pageLimit = mOffscreenPageLimit;
+                    final int startPos = Math.max(0, mCurItem - pageLimit);
+                    final int N = mAdapter.getCount();
+                    final int endPos = Math.min(N-1, mCurItem + pageLimit);
+
+                    // 3.添加 || 更新 ItemInfo
+                        // 先获取当前可见ItemInfo，如果是初始填充数据则会跳过
+                        int curIndex = -1;
+                        ItemInfo curItem = null;
+                        for (curIndex = 0; curIndex < mItems.size(); curIndex++) {
+                             final ItemInfo ii = mItems.get(curIndex);
+                             if (ii.position >= mCurItem) {
+                                if (ii.position == mCurItem) curItem = ii;
+                                break;
+                             }
+                        }
+
+                        // 添加ItemInfo
+                        if (curItem == null && N > 0) {
+                             curItem = addNewItem(mCurItem, curIndex);
+                        }
+                            // addNewItem源码：在这里执行了我们创建PagerAdapter子类的instantiateItem()方法
+                            ItemInfo addNewItem(int position, int index) {
+                                    ItemInfo ii = new ItemInfo();
+                                    ii.position = position;
+                                    ii.object = mAdapter.instantiateItem(this, position);
+                                    ii.widthFactor = mAdapter.getPageWidth(position);
+                                    if (index < 0 || index >= mItems.size()) {
+                                        mItems.add(ii);
+                                    } else {
+                                        mItems.add(index, ii);
+                                    }
+                                    return ii;
+                            }
+
+                    // 4.上面有添加curItemInfo,接下来需要添加leftItemInfo、rightItemInfo;
+                    // 或者销毁无效的ItemInfo -- 调用destroyItem()
+
+                    // 5.calculatePageOffsets
+

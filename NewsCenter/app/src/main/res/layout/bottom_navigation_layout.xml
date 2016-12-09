@@ -3,12 +3,18 @@
        xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/px_1"
+        android:background="@color/color_15000000"
+        />
+
     <cn.oywj.newscenter.widget.navigation.GradientGroup
         android:id="@+id/gradient_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@color/color_f7f7f7f"
+        android:orientation="horizontal"
         android:paddingBottom="@dimen/dp_2"
         android:paddingTop="@dimen/dp_3"
         >

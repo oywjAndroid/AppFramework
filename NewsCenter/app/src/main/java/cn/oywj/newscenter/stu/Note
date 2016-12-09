@@ -1,1 +1,26 @@
 // *** stu文件夹 *** 与该项目没有任何关系，只是作者的学习笔记。
+
+
+// 首页接口与需求：
+社会新闻	http://api.tianapi.com/social/?key=APIKEY&num=10	社会新闻API接口服务
+国内新闻	http://api.tianapi.com/guonei/?key=APIKEY&num=10	国内新闻API接口服务
+国际新闻	http://api.tianapi.com/world/?key=APIKEY&num=10	国际新闻API接口服务
+娱乐新闻	http://api.tianapi.com/huabian/?key=APIKEY&num=10	娱乐新闻、明星花边、探班、娱乐活动等
+体育新闻	http://api.tianapi.com/tiyu/?key=APIKEY&num=10	国内体育行业、体育明星动态等
+NBA新闻	    http://api.tianapi.com/nba/?key=APIKEY&num=10	NBA动态、篮球赛等
+足球新闻	http://api.tianapi.com/football/?key=APIKEY&num=10 	国足资讯、国足明星动态等
+科技新闻	http://api.tianapi.com/keji/?key=APIKEY&num=10	信息科技、数码科技、物理科技
+创业新闻	http://api.tianapi.com/startup/?key=APIKEY&num=10	互联网创业、创新、创业人物动态
+苹果新闻	http://api.tianapi.com/apple/?key=APIKEY&num=10	Apple产品动态，果粉、教程帮助
+移动互联	http://api.tianapi.com/mobile/?key=APIKEY&num=10	移动互联网行业资讯
+旅游资讯	http://api.tianapi.com/travel/?key=APIKEY&num=10	旅游、周边、景点
+健康知识	http://api.tianapi.com/health/?key=APIKEY&num=10	健康知识、养生、中西医
+奇闻异事	http://api.tianapi.com/qiwen/?key=APIKEY&num=10	世界奇闻、民间趣事、灵异事件等
+美女图片	http://api.tianapi.com/meinv/?key=APIKEY&num=10	美女图片、大家都懂
+VR科技	    http://api.tianapi.com/vr/?key=APIKEY&num=10	VR虚拟现实相关新闻资讯
+IT资讯	    http://api.tianapi.com/it/?key=APIKEY&num=10	IT行业相关新闻资讯
+
+// 默认：国际、国内、社会、体育、NBA、足球、科技、娱乐、美女、VR、IT
+// 其他：创业、苹果、移动互联、旅游、健康、奇闻异事
+
+// 需求：依据提供的接口来进行新闻的分类浏览，并且可以让用户调整分类顺序以及添加或者删除某些分类。

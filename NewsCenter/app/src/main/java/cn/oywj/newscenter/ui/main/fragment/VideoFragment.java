@@ -1,5 +1,7 @@
 package cn.oywj.newscenter.ui.main.fragment;
 
+import android.util.Log;
+
 import cn.oywj.newscenter.R;
 import cn.oywj.newscenter.base.BaseFragment;
 
@@ -18,12 +20,12 @@ public class VideoFragment extends BaseFragment {
 
     @Override
     protected void initInject() {
-
+        Log.d("Test-Fragment", "VideoFragment -- onCreateView().");
     }
 
     @Override
     protected void initEventAndData() {
-
+        Log.d("Test-Fragment", "VideoFragment -- initEventAndData(). UserVisible == " + getUserVisibleHint());
     }
 
     @Override

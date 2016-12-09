@@ -2,6 +2,7 @@ package cn.oywj.newscenter.base;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -78,18 +79,27 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         App.getInstance().removeActivity(this);
     }
 
-//    protected void setToolBar(Toolbar toolbar, String title) {
-//        toolbar.setTitle(title);
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                onBackPressed();
-//            }
-//        });
-//    }
+    /**
+     * 通过Toolbar来统一设置应用导航样式。
+     *
+     * @param toolbar Toolbar
+     * @param title   标题
+     */
+    protected void setToolBar(Toolbar toolbar, String title) {
+        toolbar.setTitle(title);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
+    }
 
     /**
      * 获取Activity的依赖注入连接器(Component)

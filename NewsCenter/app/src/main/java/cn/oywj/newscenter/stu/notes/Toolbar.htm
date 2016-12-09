@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Toolbat官方文档</title>
+</head>
+<body>
+
+	<!-- Toolbat官方文档 -->
+
+	A standard toolbar for use within application content.
+    
+    <p>A Toolbar is a generalization of {@link ActionBar action bars} for use
+    within application layouts. While an action bar is traditionally part of an
+    {@link android.app.Activity Activity's} opaque window decor controlled by the framework, a Toolbar may be placed at any arbitrary level of nesting within a view hierarchy. An application may choose to designate a Toolbar as the action bar for an Activity using the {@link android.support.v7.app.AppCompatActivity#setSupportActionBar(Toolbar) setSupportActionBar()} method.</p> <p>Toolbar supports a more focused feature set than ActionBar. From start to end, a toolbar may contain a combination of the following optional elements: 
+    <ul> <li><em>A navigation button.</em> This may be an Up arrow, navigation menu toggle, close,
+        collapse, done or another glyph of the app's choosing. This button should always be used
+        to access other navigational destinations within the container of the Toolbar and
+        its signified content or otherwise leave the current context signified by the Toolbar.The navigation button is vertically aligned within the Toolbar's minimum height,
+        if set.</li>
+        <li><em>A branded logo image.</em> This may extend to the height of the bar and can be
+        arbitrarily wide.</li>
+        <li><em>A title and subtitle.</em> The title should be a signpost for the Toolbar's current
+        position in the navigation hierarchy and the content contained there. The subtitle,
+        if present should indicate any extended information about the current content.
+        If an app uses a logo image it should strongly consider omitting a title and subtitle.</li>
+        <li><em>One or more custom views.</em> The application may add arbitrary child views
+        to the Toolbar. They will appear at this position within the layout. If a child view's
+        {@link LayoutParams} indicates a {@link Gravity} value of
+        {@link Gravity#CENTER_HORIZONTAL CENTER_HORIZONTAL} the view will attempt to center
+        within the available space remaining in the Toolbar after all other elements have been
+        measured.</li>
+        <li><em>An {@link ActionMenuView action menu}.</em> The menu of actions will pin to the
+        end of the Toolbar offering a few<a href="http://developer.android.com/design/patterns/actionbar.html#ActionButtons">
+        frequent, important or typical</a> actions along with an optional overflow menu for
+        additional actions. Action buttons are vertically aligned within the Toolbar's
+        minimum height, if set.</li></ul></p>
+        <p>In modern Android UIs developers should lean more on a visually distinct color scheme for
+      toolbars than on their application icon. The use of application icon plus title as a standard
+      layout is discouraged on API 21 devices and newer.</p>
+
+
+      <p>在应用程序内容中使用的标准工具栏。</p>
+
+      <p>工具栏是在应用程序布局中使用的{@link ActionBar操作栏}的概括。虽然操作栏传统上是由框架控制的{@link android.app.Activity Activity的}不透明窗口装饰的一部分，但是工具栏可以放置在视图层次结构中任何任意级别的嵌套。应用程序可以选择使用{@link android.support.v7.app.AppCompatActivity＃setSupportActionBar（Toolbar）setSupportActionBar（）}方法将工具栏指定为活动的操作栏。</p>
+
+		<p>
+			工具栏支持比ActionBar更集中的功能集。从开始到结束，工具栏可以包含以下可选元素的组合：
+		</p>
+
+		<p>
+			<ul>
+				<li>
+					
+					 <em>导航按钮</em>这可能是一个向上箭头，导航菜单切换，关闭，折叠，完成或另一个字形的应用程序选择。此按钮应始终用于访问工具栏容器内的其他导航目的地及其指定的内容，或者保留由工具栏表示的当前上下文。如果设置，导航按钮在工具栏的最小高度内垂直对齐。
+
+				</li>
+				<li>
+					
+					<em>logo图片</em>这可以延伸到杆的高度并且可以任意宽。
+
+				</li>
+				<li>
+					<em>标题和子标题</em>
+					标题应该是工具栏在导航层次结构中的当前位置和包含在其中的内容的路标。字幕（如果存在）应该指示关于当前内容的任何扩展信息。如果应用程式使用标志图片，建议您不要略过标题和字幕。
+
+				</li>
+				<li>
+					<em>一个或多个自定义视图。</em>应用程序可以向工具栏添加任意子视图。它们将出现在布局中的此位置。如果子视图的{@link LayoutParams}表示{@link Gravity}值为{@link Gravity＃CENTER_HORIZONTAL CENTER_HORIZONTAL}，则在测量完所有其他元素后，视图将尝试在工具栏中剩余的可用空间中居中。
+				</li>
+				<li>
+					<em>{@link ActionMenuView操作菜单}。</em>操作菜单将固定到工具栏的末尾，提供几个频繁，重要或典型的操作，以及可选的溢出菜单，用于执行其他操作。如果设置，操作按钮在工具栏的最小高度内垂直对齐。
+
+				</li>
+
+			</ul>
+
+
+		</p>
+
+		<p>在现代Android UI中，开发人员应该更多地关注工具栏的视觉上不同的颜色方案，而不是应用程序图标。不推荐在API 21设备和更新版本上使用应用程序图标和标题作为标准布局。</p>
+	
+</body>
+</html>

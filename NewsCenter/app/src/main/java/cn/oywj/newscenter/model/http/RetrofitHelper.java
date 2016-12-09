@@ -88,6 +88,7 @@ public final class RetrofitHelper {
         //错误重连
         builder.retryOnConnectionFailure(true);
         mHttpClient = builder.build();
+
     }
 
     /**

@@ -1,6 +1,7 @@
 package cn.oywj.newscenter.widget.navigation;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -15,9 +16,10 @@ import android.widget.RadioGroup;
  */
 public class GradientGroup extends RadioGroup implements ViewPager.OnPageChangeListener {
     private ViewPager mViewPager;
+    private OnPageChangeListener mListener;
 
     public GradientGroup(Context context) {
-        super(context);
+        this(context,null);
     }
 
     public GradientGroup(Context context, AttributeSet attrs) {
@@ -39,12 +41,19 @@ public class GradientGroup extends RadioGroup implements ViewPager.OnPageChangeL
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+    }
+
+    @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        if (mListener != null) {
+            mListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
+        }
         updateGradient(position, positionOffset);
     }
 
     private void updateGradient(int position, float offset) {
-        Log.d("updateGradient", "position == " + position + ",offset == " + offset);
         if (offset > 0f && offset <= 1f) {
             ((GradientButton) getChildAt(position)).updateAlpha(255 * (1 - offset));
             ((GradientButton) getChildAt(position + 1)).updateAlpha(255 * offset);
@@ -53,13 +62,18 @@ public class GradientGroup extends RadioGroup implements ViewPager.OnPageChangeL
 
     @Override
     public void onPageSelected(int position) {
+        if (mListener != null) {
+            mListener.onPageSelected(position);
+        }
         setSelectedViewChecked(position);
     }
 
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
+        if (mListener != null) {
+            mListener.onPageScrollStateChanged(state);
+        }
     }
 
     private void setSelectedViewChecked(int position) {
@@ -84,6 +98,19 @@ public class GradientGroup extends RadioGroup implements ViewPager.OnPageChangeL
     public void setViewPager(ViewPager viewPager) {
         mViewPager = viewPager;
         mViewPager.addOnPageChangeListener(this);
+    }
+
+    public interface OnPageChangeListener {
+
+        void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
+
+        void onPageSelected(int position);
+
+        void onPageScrollStateChanged(int state);
+    }
+
+    public void setOnPageChangeListener(OnPageChangeListener listener) {
+        mListener = listener;
     }
 
 }

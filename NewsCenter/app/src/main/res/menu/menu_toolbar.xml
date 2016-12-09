@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:ignore="AppCompatResource"
+    >
+
+    <!-- showAsAction 表示的是工具栏item展示的位置，
+      always:代表只展示在ActionBar上;
+      never:代表只在操作栏上展示;
+      ifRoom:代表着如果ActionBar上面有空间展示就展示在上面，没有空间就展示在操作栏中-->
+    <item
+        android:id="@+id/menu_collection"
+        android:icon="@mipmap/choiceness_on"
+        android:showAsAction="always"
+        android:title="收藏"
+        />
+
+    <item
+        android:id="@+id/menu_play"
+        android:icon="@mipmap/play_on"
+        android:showAsAction="never"
+        android:title="直播"
+        />
+
+</menu>

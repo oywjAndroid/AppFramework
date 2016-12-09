@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="main_model_names">
+        <item>资讯全掌握</item>
+        <item>放映美丽人生</item>
+        <item>去哪儿都放心</item>
+        <item>遇见知心人</item>
+    </string-array>
+</resources>

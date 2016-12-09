@@ -1,0 +1,106 @@
+关于ToolBar的学习以及源码分析：
+    ## 关于Toolbar的官方介绍可以查看Toolbar.htm文件。
+    Activity使用Toolbar流程：
+    Activity --> ActionBar --> ToolbarActionBar --> Toolbar。
+    1.Toolbar概括：
+        Toolbar设计的由来：主要是为了统一Android界面风格。
+        Toolbar提供以下部件可供选择：
+            1.导航按钮（如：返回上一页的箭头）
+            2.logo图标
+            3.标题以及子标题
+            4.添加自定义视图
+            5.操作按钮，可将一些常用操作放置在操作按钮下面
+
+
+    2.Toolbar源码分析(通过分析源码察看Toolbar是如何兑现上述功能)：
+
+        -- Toolbar extends ViewGroup
+
+        2.1 Toolbar的初始化：
+
+            final TintTypedArray a = TintTypedArray.obtainStyledAttributes(getContext(), attrs,
+                            R.styleable.Toolbar, defStyleAttr, 0);
+            ....
+            mDrawableManager = AppCompatDrawableManager.get();
+            主要进行了自定义属性的解析,获取了AppCompatDrawableManger对象。
+
+        2.2 onMeasure() & onLayout()：
+
+            主要是测量和布局Toolbar中固定控件(
+                 ActionMenuView mMenuView;
+                 TextView mTitleTextView;
+                 TextView mSubtitleTextView;
+                 ImageButton mNavButtonView;
+                 ImageView mLogoView;
+                 ImageButton mCollapseButtonView;
+            )的大小、位置。
+
+        2.3 Toolbar的使用详解：
+
+            1.决定使用Toolbar就必须放弃系统默认的ActionBar，那么必须先要设置该AppCompActivity样式为NoActionBar的效果。
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            2.创建Toolbar对象(建议采用xml形式)
+                   <android.support.v7.widget.Toolbar
+                    android:id="@+id/my_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    android:elevation="4dp"
+                    android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            3.将Toolbar设置为SupportActionBar
+                setSupportActionBar(toolbar);
+                仅有如上的设置，当前Toolbar的效果与默认ActionBar效果一致。
+
+                // --- Demo Code ---
+                setSupportActionBar(mToolbar);
+                        ActionBar actionBar = getSupportActionBar();
+                        if (actionBar != null) {
+                            // setDisplayXXXX() --> 用于控制是否显示XX
+                            // 1.显示返回上页按钮
+                            actionBar.setDisplayHomeAsUpEnabled(true);
+                            // 2.显示Logo图标，logo图标位于返回按钮右侧
+                            actionBar.setDisplayUseLogoEnabled(true);
+                            actionBar.setLogo(R.mipmap.browse);
+                            // 3.显示标题
+                            actionBar.setDisplayShowTitleEnabled(true);
+                            actionBar.setTitle("新闻");
+                            actionBar.setSubtitle("网罗全球资讯");
+                            mToolbar.setNavigationIcon(R.mipmap.discover);
+                            // 4.显示工具栏
+                            // 4.1 在menu文件夹下面创建(menu xml文件)来指定menu item.
+                            // 4.2 在Activity中复写onCreateOptionsMenu(),onOptionsItemSelected()方法.
+                        }
+
+                    @Override
+                    public boolean onCreateOptionsMenu(Menu menu) {
+                        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onOptionsItemSelected(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_collection:
+                                ToastUtil.shortShow("收藏");
+                                return true;
+                            case R.id.menu_play:
+                                ToastUtil.shortShow("直播");
+                                return true;
+                        }
+                        return super.onOptionsItemSelected(item);
+                    }
+                // --- Demo Code ---
+
+                4.由于Toolbar继承了ViewGroup，因此如果以上Android默认的导航栏样式无法满足需求
+                可让Toolbar添加自定义View进行展示。
+
+                Toolbar 样式详解：
+               -----------------------------
+               | 1 | 2 | 3 |     4     | 5 |
+               -----------------------------
+                1 --> NavigationButtonView，导航按钮:(常用于设置返回上一页)。
+                2 --> LogoView,用于展示logo图标(某类图片)。
+                3 --> TitleView,用于显示标题、副标题文字。
+                4 --> 用于展示Toolbar child view 的区域，如果其他都不展示，这块区域展示的大小与整个ActionBar大小一致。
+                5 --> 用于展示工具栏的区域，可展示各种Menu Item.

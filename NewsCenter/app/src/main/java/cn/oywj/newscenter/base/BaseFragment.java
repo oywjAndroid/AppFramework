@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,9 @@ import android.view.ViewGroup;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import cn.oywj.newscenter.di.component.DaggerAppComponents;
+import cn.oywj.newscenter.di.component.DaggerFragmentComponents;
+import cn.oywj.newscenter.di.component.FragmentComponents;
 
 /**
  * projectName:NewsCenter
@@ -62,6 +66,11 @@ public abstract class BaseFragment<P extends BasePresenter> extends Fragment imp
             initEventAndData();
         }
         super.onHiddenChanged(hidden);
+    }
+
+    public FragmentComponents getFragmentComponents() {
+        return DaggerFragmentComponents.builder()
+                .build();
     }
 
     @Override
