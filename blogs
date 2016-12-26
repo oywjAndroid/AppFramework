@@ -1,0 +1,24 @@
+
+## Android 开源项目集合： https://github.com/Trinea/android-open-project
+1.Android6.0 动态权限管理：
+   相机权限动态获取 --- http://www.jianshu.com/p/a37f4827079a
+
+2.ijkplayer 视频相关：
+   2.1 -- http://blog.csdn.net/ht_android/article/details/51859698
+   2.2 -- https://github.com/Bilibili/ijkplayer
+   2.3 -- http://blog.csdn.net/leixiaohua1020/article/details/15811977
+   
+3.Android Surface 系统详解：
+   3.1 -- http://wiki.jikexueyuan.com/project/deep-android-v1/surface.html
+   
+4.RxJava详解：
+   4.1《给 Android 开发者的 RxJava 详解》 -- https://gank.io/post/560e15be2dca930e00da1083
+   4.2《深入浅出RxJava》-- http://blog.csdn.net/lzyzsd/article/details/41833541
+
+5.Dagger:
+   5.1 Dagger使用详解 -- http://www.jianshu.com/p/94d47da32656
+   
+6.GreenDAO:
+   6.1 GreenDAO使用详解 -- http://www.jianshu.com/p/853401a7d02b
+   
+   
