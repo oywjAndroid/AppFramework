@@ -1,5 +1,7 @@
 package cn.oywj.newscenter.stu;
 
+import android.provider.MediaStore;
+
 /**
  * projectName:NewsCenter
  * packageName:cn.oywj.newscenter.stu
@@ -8,7 +10,6 @@ package cn.oywj.newscenter.stu;
  * instructions:**
  */
 public class Bean {
-
     private String name;
     private int age;
 

@@ -1,0 +1,237 @@
+一、关于Android中的Surface系统的学习：
+
+   http://wiki.jikexueyuan.com/project/deep-android-v1/surface.html --- 学习网址
+
+    1. Surface(视图)系统是继Audio(音频)系统外的又一复杂系统。
+
+    2. 该笔记主要是为了学习:
+           * Activity的启动、显示过程
+           * Surface详细分析
+           * SurfaceFlinger详细分析
+
+    3.
+           Application
+                |
+           draw/Canvas
+                |
+            ----|----
+            |       |
+           Skia   OpenGL
+            |       |
+          -- Surface --
+                |
+                |
+          SurfaceFlinger
+
+         + 不管App是通过Skia绘制的二维图形、还是OpenGL绘制的三维图形都需要与Surface交互。
+         + Surface 包含的数据需要提供给SurfaceFliger进行数据的混合，最后通过绘图引擎进行渲染。
+
+二、App与Surface的交互：
+
+    1、Activity的显示过程：
+
+       ActivityThread: 该来就是App的入口，App的启动的main方法在这个类中。
+
+       - Activity的创建：
+         --1、zygote fork 子进程，执行ActivityThread.main()启动App.
+
+         --2、handleLaunchActivity(ActivityClientRecord r, Intent customIntent){
+                ...
+                // 2.1 创建Activity对象,并且会调用activity.attach()该方法中便会创建PhoneWindow对象，并且会给window设置WindowManager
+                Activity a = performLaunchActivity(r, customIntent);
+                    {
+                          ...
+                          // 通过获取的包信息来反射创建Activity对象
+                          java.lang.ClassLoader cl = r.packageInfo.getClassLoader();
+                          activity = mInstrumentation.newActivity(
+                                       cl, component.getClassName(), r.intent);
+                          StrictMode.incrementExpectedActivityCount(activity.getClass());
+                          r.intent.setExtrasClassLoader(cl);
+                          r.intent.prepareToEnterProcess();
+
+                          // 创建了Activity对象之后会回调onCreate()、onStart()方法
+                          ...
+                          // 关键方法
+                          activity.attach(appContext, this, getInstrumentation(), r.token,
+                                                  r.ident, app, r.intent, r.activityInfo, title, r.parent,
+                                                  r.embeddedID, r.lastNonConfigurationInstances, config,
+                                                  r.referrer, r.voiceInteractor);
+                          ...
+                    }
+
+                // 2.2 处理Activity的UI操作(Window、DecorView)
+                handleResumeActivity(r.token, false, r.isForward,
+                                    !r.activity.mFinished && !r.startsNotResumed);
+                     {
+                            ...
+                            r.window = r.activity.getWindow();
+                            View decor = r.window.getDecorView();
+                            decor.setVisibility(View.INVISIBLE);
+                            ViewManager wm = a.getWindowManager();
+                            WindowManager.LayoutParams l = r.window.getAttributes();
+                            a.mDecor = decor;
+                            l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+                            l.softInputMode |= forwardBit;
+                            if (a.mVisibleFromClient) {
+                                a.mWindowAdded = true;
+                                wm.addView(decor, l);
+                            }
+                            ...
+                     }
+                ...
+
+            }
+
+         --3、通过上面的分析已经能够知道Activity创建、Activity的生命周期、Window对象的创建，
+            但是至于Window与DecorView之间是如何联系的并没有涉及。
+            Window 与 DecorView之间是如何建立联系？
+               3.1 在Activity的onCreate()方法中要做的第一件事情就是setContentView(),
+                   并且DecorView中包含了HeaderView(ActionBar)、ContentView(所有子View的父节点)。
+
+                   Activity的setContentView()其实只是对Window.setContentView()进行了包装，其实也说明Activity并不负责UI显示部分的工作，
+                   而是交给Window(PhoneWindow)来负责.(Activity只负责生命周期)
+                   activity.setContentView(){
+                       getWindow().setContentView(layoutResID);
+                       initWindowDecorActionBar();
+                   }
+                   那么疑问来了Window的实现类是啥?
+
+               3.2 根据** activity.attach() ** |关键方法| 知晓Window、WindowManager的真面目
+                    activity.attach()在Android6.0(23)之前与之后创建Window对象有些差异：
+                    6.0之前：
+                            mFragments.attachActivity(this, mContainer, null);
+                            mWindow = PolicyManager.makeNewWindow(this);
+
+                    6.0之后：PolicyManager在6.0之后被取消了
+                            mFragments.attachHost(null /*parent*/);
+                            mWindow = new PhoneWindow(this);
+                    其实代码的差异并不大，PolicyManager只是一个代理类，它其实也是创建了PhoneWindow对象。
+                    Window --> PhoneWindow
+
+                    mWindow.setWindowManager(
+                                    (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),
+                                    mToken, mComponent.flattenToString(),
+                                    (info.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0);
+                    6.0之前：
+                            setWindowManager(WindowManagerwm,IBinder appToken, String appName) {//注意，传入的wm值为null
+                                   mAppToken = appToken;
+                                   mAppName = appName;
+                                    if(wm == null) {
+                                        //如果wm为空的话，则创建WindowManagerImpl对象
+                                        wm = WindowManagerImpl.getDefault();
+                                    }
+
+                                   //mWindowManager是一个LocalWindowManager
+                                   mWindowManager = new LocalWindowManager(wm);
+                                }
+
+                    6.0之后：
+                            mAppToken = appToken;
+                            mAppName = appName;
+                            mHardwareAccelerated = hardwareAccelerated
+                                   || SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, false);
+                            if (wm == null) {
+                                  wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+                            }
+                            mWindowManager = ((WindowManagerImpl)wm).createLocalWindowManager(this);
+
+                    6.0之前WindowManager是LocalWindowManager,6.0之后为WindowManagerImpl,
+                    不过LocalWindowManager其实实际操作的也是 WindowManagerImpl。
+
+                    这个时候应该就明白了，onCreate() --> setContentView()的原理就是：PhoneWindow 创建 DecorView之后，
+                    通过WindowManager的addView()将DecorView和PhoneWindow进行关联。
+
+               3.3 通过上述分析我们已经知道了WindowManager是将PhoneWindow 和 DecorView联系起来的关键，
+               虽然DecorView是在PhoneWindow中被创建的，但是对于DecorView如何被展现在手机屏幕上的并没有证明?
+
+               既然是WindowManger.addView(View view,LayoutParams params)执行的添加DecorView的动作，那么该方法的实现肯定能够证明
+               DecorView如何被渲染到手机屏幕上的?
+
+                    1. 首先，前面已经能够知道WindowManger的实现类：WindowManagerImpl，那么就需要研究这个类的addView()方法。
+
+                    2. WindowManagerImpl中addView的实现：
+                        @Override
+                        public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+                            applyDefaultToken(params);
+                            mGlobal.addView(view, params, mDisplay, mParentWindow);
+                        }
+                        这里又发现了mGlobal.addView(),mGlobal --> WindowManagerGlobal
+
+                    3. WindowMangerGlobal中addView的实现：
+
+                        WindowManagerGlobal.addView(View view, ViewGroup.LayoutParams params,
+                                                                Display display, Window parentWindow)
+                        {
+                                ...
+                                ViewRootImpl root;
+                                View panelParentView = null;
+                                synchronized (mLock) {
+                                    // Start watching for system property changes.
+                                    ...
+                                    // If this is a panel window, then find the window it is being
+                                    // attached to for future reference.
+                                    if (wparams.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW &&
+                                            wparams.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                                        final int count = mViews.size();
+                                        for (int i = 0; i < count; i++) {
+                                            if (mRoots.get(i).mWindow.asBinder() == wparams.token) {
+                                                panelParentView = mViews.get(i);
+                                            }
+                                        }
+                                    }
+                                    root = new ViewRootImpl(view.getContext(), display);
+                                    view.setLayoutParams(wparams);
+                                    // 将DecorView、ViewRootImpl、WindowManager.LayoutParams对应的保存起来
+                                    mViews.add(view);
+                                    mRoots.add(root);
+                                    mParams.add(wparams);
+                                }
+                                // do this last because it fires off messages to start doing things
+                                root.setView(view, wparams, panelParentView);
+                                ...
+                        }
+
+                        看了WindowManagerGlobal.addView()方法之后发现的重点：
+                        * ViewRootImpl(难点):
+                            1. ViewRootImpl是什么：ViewRootImpl是真正实现WindowManager.addView()且将DecorView渲染至屏幕的重要因素。
+                            2. ViewRootImpl implements ViewParent
+                            3. ViewRootImpl(){
+                                  ...
+                                  // ViewRootImpl构造方法重要的对象
+                                  IWindowSession mWindowSession = WindowManagerGlobal.getWindowSession();
+
+                                  // W extends IWindow.Stub
+                                  mWindow = new W(this);
+                                  ...
+                            };
+
+                                ViewRootImpl --持有--> final Surface mSurface = new Surface();
+
+                             4. 需要了解IWindowSession、W 这两个类的作用?
+                                   前提：ViewRootImpl.setView() 就是渲染DecorView的入口，由于Android系统的窗体管理器(WindowManagerService)
+                                   是一个系统服务，为了能够将DecorView渲染至屏幕窗体上必须要通过WMS这个系统服务才能实现，所以需要通过Binder机制
+                                   进行IPC通信才能将DecorView的数据传到WMS中才能渲染出来。
+
+                                   在继续分析代码之前，必须要掌握Binder通信机制才能继续往下分析，否则可能会导致"代码恐惧症"。
+
+
+
+
+
+                        * panelParentView --> DecorView
+
+                        * root.setView():
+
+
+
+
+
+
+
+
+
+
+
+
+
+

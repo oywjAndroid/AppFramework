@@ -1,0 +1,17 @@
+一、关于Android Binder通信机制的介绍：
+
+    1.Binder是什么：Binder机制是用于IPC通信的一种方式(其他的IPC通信方式有Socket、Pipe-管道)。
+    2.Binder机制实现原理：Binder机制是采用 < C/S通信模型 + ServiceManager >来实现的。
+    3.Binder机制流程：
+
+        3.1 zygote fork ServiceManger进程、Service进程(系统Service都位于该进程中)。
+
+        3.2 Service进程向ServiceManager进行Service的注册。
+
+        3.3 Client进程要与指定Service进行通信，首先需要从ServiceManager获取指定Service的信息。
+
+        3.4 Client通过在SM中获取的Service信息与Service建立通信信道，之后就可以进行数据交互。
+
+二、通过分析MediaService进一步了解Binder机制：
+
+

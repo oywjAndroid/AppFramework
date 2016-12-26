@@ -60,6 +60,8 @@ public class WelcomePresenter extends RxBasePresenter<WelcomeContract.ViewContra
                     }
                 });
         addSubscription(subscription);
+
+
     }
 
     /**

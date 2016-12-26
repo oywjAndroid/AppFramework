@@ -21,8 +21,8 @@ public abstract class SimpleBaseActivity extends AppCompatActivity {
     protected Activity mActivity;
 
     @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         ButterKnife.bind(this);
         mActivity = this;
